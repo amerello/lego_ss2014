@@ -1,0 +1,118 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		
+		<style>
+		body {
+			overflow	: hidden;
+			padding		: 0;
+			margin		: 0;
+			background-color: #BBB;
+		}
+		#info {
+			position	: absolute;
+			top		: 0px;
+			width		: 100%;
+			padding		: 5px;
+			text-align	: center;
+		}
+		#info a {
+			color		: #66F;
+			text-decoration	: none;
+		}
+		#info a:hover {
+			text-decoration	: underline;
+		}
+		#container {
+			width		: 100%;
+			height		: 100%;
+			overflow	: hidden;
+			padding		: 0;
+			margin		: 0;
+			-webkit-user-select	: none;
+			-moz-user-select	: none;
+		}
+		</style>
+	</head>
+	<body>
+		<div id="container"></div>
+		<div id="info">
+			<div id="myDiv"><h2>Car steering</h2></div>
+			<br/>
+			<span id="result"></span>
+			
+            
+
+		</div> 
+		
+		<script src="../virtualjoystick.js"></script>
+		<script>
+		    sent = "true";
+			dx_prev = 0;
+			dy_prev = 0;
+			console.log("touchscreen is", VirtualJoystick.touchScreenAvailable() ? "available" : "not available");
+			var joystick	= new VirtualJoystick({
+				container	: document.getElementById('container'),
+				mouseSupport	: true,
+				stationaryBase	: false,
+				baseX		: 100,
+				baseY		: 100,				
+			});
+		    n = 0;
+			setInterval(function(){
+				var outputEl	= document.getElementById('result');
+				var dx = joystick.deltaX();
+				var dy = joystick.deltaY();
+				outputEl.innerHTML	= '<b>Result:</b> '
+					+ ' dx:'+dx
+					+ ' dy:'+dy
+					+ (joystick.right()	? ' right'	: '')
+					+ (joystick.up()	? ' up'		: '')
+					+ (joystick.left()	? ' left'	: '')
+					+ (joystick.down()	? ' down' 	: '');	
+				if(sent == "true" && (dx != dx_prev ||  dy != dy_prev))
+				{
+					 loadXMLDoc();
+				     dx_prev = dx;
+				     dy_prev = dy;
+					 n = 0;
+				}
+                else if(dx!=0 || dy!=0)
+				{
+				     n++;
+					 if(n==30){
+					  loadXMLDoc();
+					  n = 0;
+					 }
+				}
+
+			},  1000 * 1/30);
+			
+			function loadXMLDoc()
+			{
+				sent = "false";
+				var xmlhttp;
+				xmlhttp=new XMLHttpRequest();
+	  
+				xmlhttp.onreadystatechange=function()
+				{
+					if (xmlhttp.readyState==4 && xmlhttp.status==200)
+					{
+					    var obj = eval ("(" + xmlhttp.responseText + ")");
+						
+						document.getElementById("myDiv").innerHTML= xmlhttp.responseText + 
+						"<br>vl:" + obj.v_left + " vr:"+ obj.v_right+ " connected boards: " + obj.board_status[0]+" "+obj.board_status[1];
+						sent="true";
+					}
+				}
+				xmlhttp.open("POST","whereveryouwant",true);
+				msg = 'Values:'
+						+ ' dx: '+joystick.deltaX()
+						+ ' dy: '+joystick.deltaY();
+				xmlhttp.send(msg);
+			}
+			
+		</script>
+	</body>
+</html>
