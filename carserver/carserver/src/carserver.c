@@ -7,7 +7,7 @@
 #include <fcntl.h>
 #include <time.h>
 
-#include <arpa/inet.h>
+#include <arpa/inet.h> //htons()
 #include <linux/if.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <libconfig.h>
+#include <libconfig.h> // Library for configuration file parsing
 
 #include "nanoboard.h"
 #include "car_handler.h"
@@ -146,7 +146,7 @@ main(int argc, char **argv)
 			run = 0;
 		}
 
-	FD_ZERO(&rfds);
+	FD_ZERO(&rfds); //Initializes the descriptor to the null set.
 	maxfd =-1;
 	const char * addr;
 	int port,led,W;
@@ -177,9 +177,9 @@ main(int argc, char **argv)
 		nano[i].sa.sin_family = AF_INET;
 		
 		printf("ip address and port of board number %d: %s, %d \n",i, addr,port);
-		inet_aton(addr,&(nano[i].sa.sin_addr));
+		inet_aton(addr,&(nano[i].sa.sin_addr)); //Converts IP Address from char* to struct in_addr
 		
-		nano[i].sa.sin_port = htons(port);
+		nano[i].sa.sin_port = htons(port); //converts unsigned short int from host byte order to network byte order
 		nano[i].indat.values.led = led;
 		nano[i].indat.values.W = W;
 		nano[i].indat.values.setEnMotorController = TRUE;
@@ -201,7 +201,7 @@ main(int argc, char **argv)
 		}
 		printf("sent I, this is %d byte\n",ret);
 		nano[i].init = TRUE;
-		FD_SET(	sd_in,&rfds);
+		FD_SET(sd_in,&rfds); //Adds the file descriptor sd_in to the set rfds
 		maxfd = MAX(maxfd,sd_in);
 		conn_boards |= 1<<i;
 		conn_ctr[i] =0;
